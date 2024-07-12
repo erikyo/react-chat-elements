@@ -1,185 +1,251 @@
-import React, { FC, Key, useEffect, useRef, useState } from 'react'
-import './MessageList.css'
+import type React from "react";
+import type { LegacyRef } from "react";
+import type { FC } from "react";
+import { useEffect, useRef, useState } from "react";
+import classNames from "classnames";
+import MessageBox from "../MessageBox/MessageBox";
+import { FaChevronDown } from "react-icons/fa";
 
-import MessageBox from '../MessageBox/MessageBox'
+import type { IMessageListProps, MessageListEvent } from "../type";
 
-import classNames from 'classnames'
-import { FaChevronDown } from 'react-icons/fa'
-import { IMessageListProps, MessageListEvent } from '../type'
+import "./MessageList.css";
+import type { MessageListFocusEvent } from "../type";
 
 const MessageList: FC<IMessageListProps> = ({
-  referance = null,
-  lockable = false,
-  toBottomHeight = 300,
-  downButton,
-  ...props
-}) => {
-  const [scrollBottom, setScrollBottom] = useState(0)
-  const [_downButton, setDownButton] = useState(false)
-  const prevProps = useRef(props)
+	reference,
+	lockable = false,
+	toBottomHeight = 300,
+	downButton,
+	...props
+}: IMessageListProps) => {
+	const [scrollBottom, setScrollBottom] = useState<number>(0);
+	const [_downButton, setDownButton] = useState(false);
+	const prevProps = useRef(props);
 
-  const checkScroll = () => {
-    var e = referance
-    if (!e || !e.current) return
+	const checkScroll = () => {
+		const e = reference ?? null;
+		if (e?.current) return;
+		const el = e.current as HTMLDivElement;
 
-    if (toBottomHeight === '100%' || (toBottomHeight && scrollBottom < toBottomHeight)) {
-      e.current.scrollTop = e.current.scrollHeight // scroll to bottom
-    } else {
-      if (lockable === true) {
-        e.current.scrollTop = e.current.scrollHeight - e.current.offsetHeight - scrollBottom
-      }
-    }
-  }
+		if (
+			toBottomHeight === "100%" ||
+			(toBottomHeight && scrollBottom < Number(toBottomHeight))
+		) {
+			el.scrollTop = el.scrollHeight; // scroll to bottom
+		} else {
+			if (lockable && e.current) {
+				el.scrollTop = el.scrollHeight - el.offsetHeight - scrollBottom;
+			}
+		}
+	};
 
-  useEffect(() => {
-    if (!referance) return
+	useEffect(() => {
+		if (!reference?.current) return;
 
-    if (prevProps.current.dataSource.length !== props.dataSource.length) {
-      setScrollBottom(getBottom(referance))
-      checkScroll()
-    }
+		if (prevProps.current?.dataSource?.length !== props.dataSource.length) {
+			setScrollBottom(getBottom(reference.current));
+			checkScroll();
+		}
 
-    prevProps.current = props
-  }, [prevProps, props])
+		prevProps.current = props;
+	}, [checkScroll, reference, props]);
 
-  const getBottom = (e: any) => {
-    if (e.current) return e.current.scrollHeight - e.current.scrollTop - e.current.offsetHeight
-    return e.scrollHeight - e.scrollTop - e.offsetHeight
-  }
+	const getBottom = (e: HTMLElement | undefined): number => {
+		if (e) {
+			return e.scrollHeight - e.scrollTop - e.offsetHeight;
+		}
+		return 0;
+	};
 
-  const onOpen: MessageListEvent = (item, index, event) => {
-    if (props.onOpen instanceof Function) props.onOpen(item, index, event)
-  }
+	const onOpen: MessageListEvent = (item, index, event) => {
+		if (props.onOpen instanceof Function) props.onOpen(item, index, event);
+	};
 
-  const onDownload: MessageListEvent = (item, index, event) => {
-    if (props.onDownload instanceof Function) props.onDownload(item, index, event)
-  }
+	const onDownload: MessageListEvent = (item, index, event) => {
+		if (props.onDownload instanceof Function)
+			props.onDownload(item, index, event);
+	};
 
-  const onPhotoError: MessageListEvent = (item, index, event) => {
-    if (props.onPhotoError instanceof Function) props.onPhotoError(item, index, event)
-  }
+	const onPhotoError: MessageListEvent = (item, index, event) => {
+		if (props.onPhotoError instanceof Function)
+			props.onPhotoError(item, index, event);
+	};
 
-  const onClick: MessageListEvent = (item, index, event) => {
-    if (props.onClick instanceof Function) props.onClick(item, index, event)
-  }
+	const onClicked: MessageListEvent = (item, index, event) => {
+		if (props.onClicked instanceof Function)
+			props.onClicked(item, index, event);
+	};
 
-  const onTitleClick: MessageListEvent = (item, index, event) => {
-    if (props.onTitleClick instanceof Function) props.onTitleClick(item, index, event)
-  }
+	const onTitleClick: MessageListEvent = (item, index, event) => {
+		if (props.onTitleClick instanceof Function)
+			props.onTitleClick(item, index, event);
+	};
 
-  const onForwardClick: MessageListEvent = (item, index, event) => {
-    if (props.onForwardClick instanceof Function) props.onForwardClick(item, index, event)
-  }
+	const onForwardClick: MessageListEvent = (item, index, event) => {
+		if (props.onForwardClick instanceof Function)
+			props.onForwardClick(item, index, event);
+	};
 
-  const onReplyClick: MessageListEvent = (item, index, event) => {
-    if (props.onReplyClick instanceof Function) props.onReplyClick(item, index, event)
-  }
+	const onReplyClick: MessageListEvent = (item, index, event) => {
+		if (props.onReplyClick instanceof Function)
+			props.onReplyClick(item, index, event);
+	};
 
-  const onReplyMessageClick: MessageListEvent = (item, index, event) => {
-    if (props.onReplyMessageClick instanceof Function) props.onReplyMessageClick(item, index, event)
-  }
+	const onReplyMessageClick: MessageListEvent = (item, index, event) => {
+		if (props.onReplyMessageClick instanceof Function)
+			props.onReplyMessageClick(item, index, event);
+	};
 
-  const onRemoveMessageClick: MessageListEvent = (item, index, event) => {
-    if (props.onRemoveMessageClick instanceof Function) props.onRemoveMessageClick(item, index, event)
-  }
+	const onRemoveMessageClick: MessageListEvent = (item, index, event) => {
+		if (props.onRemoveMessageClick instanceof Function)
+			props.onRemoveMessageClick(item, index, event);
+	};
 
-  const onContextMenu: MessageListEvent = (item, index, event) => {
-    if (props.onContextMenu instanceof Function) props.onContextMenu(item, index, event)
-  }
+	const onContextMenuOpen: MessageListEvent = (item, index, event) => {
+		if (props.onContextMenuOpen instanceof Function)
+			props.onContextMenuOpen(event);
+	};
 
-  const onMessageFocused: MessageListEvent = (item, index, event) => {
-    if (props.onMessageFocused instanceof Function) props.onMessageFocused(item, index, event)
-  }
+	const onMessageFocused: MessageListFocusEvent = (item, index, event) => {
+		if (props.onMessageFocused instanceof Function)
+			props.onMessageFocused(item, index, event);
+	};
 
-  const onMeetingMessageClick: MessageListEvent = (item, index, event) => {
-    if (props.onMeetingMessageClick instanceof Function) props.onMeetingMessageClick(item, index, event)
-  }
+	const onMeetingMessageClick: MessageListEvent = (item, index, event) => {
+		if (props.onMeetingMessageClick instanceof Function)
+			props.onMeetingMessageClick(item, index, event);
+	};
 
-  const onScroll = (e: React.UIEvent<HTMLElement>): void => {
-    var bottom = getBottom(e.currentTarget)
-    setScrollBottom(bottom)
-    if (toBottomHeight === '100%' || (toBottomHeight && bottom > toBottomHeight)) {
-      if (_downButton !== true) {
-        setDownButton(true)
-        setScrollBottom(bottom)
-      }
-    } else {
-      if (_downButton !== false) {
-        setDownButton(false)
-        setScrollBottom(bottom)
-      }
-    }
+	const onScroll = (e: React.UIEvent<HTMLDivElement>): void => {
+		const element = e?.currentTarget as HTMLDivElement;
+		const bottom = getBottom(element);
+		setScrollBottom(bottom);
+		if (
+			toBottomHeight === "100%" ||
+			(toBottomHeight && bottom > Number(toBottomHeight))
+		) {
+			if (!_downButton) {
+				setDownButton(true);
+				setScrollBottom(bottom);
+			}
+		} else {
+			if (_downButton) {
+				setDownButton(false);
+				setScrollBottom(bottom);
+			}
+		}
 
-    if (props.onScroll instanceof Function) {
-      props.onScroll(e)
-    }
-  }
+		if (props.onScroll instanceof Function) {
+			props.onScroll(e as React.UIEvent<HTMLDivElement>);
+		}
+	};
 
-  const toBottom = (e: any) => {
-    if (!referance) return
-    referance.current.scrollTop = referance.current.scrollHeight
-    if (props.onDownButtonClick instanceof Function) {
-      props.onDownButtonClick(e)
-    }
-  }
+	const toBottom = (e: React.MouseEvent<HTMLElement>) => {
+		if (!reference?.current) return;
+		const el = reference.current as HTMLDivElement;
+		el.scrollTop = el.scrollHeight;
+		if (props.onDownButtonClick instanceof Function) {
+			props.onDownButtonClick(e);
+		}
+	};
 
-  const onMeetingMoreSelect: MessageListEvent = (item, i, e) => {
-    if (props.onMeetingMoreSelect instanceof Function) props.onMeetingMoreSelect(item, i, e)
-  }
+	const onMeetingMoreSelect: MessageListEvent = (item, i, e) => {
+		if (props.onMeetingMoreSelect instanceof Function)
+			props.onMeetingMoreSelect(item, i, e);
+	};
 
-  const onMeetingLinkClick: MessageListEvent = (item, i, e) => {
-    if (props.onMeetingLinkClick instanceof Function) props.onMeetingLinkClick(item, i, e)
-  }
+	const onMeetingLinkClick: MessageListEvent = (item, i, e) => {
+		if (props.onMeetingLinkClick instanceof Function)
+			props.onMeetingLinkClick(item, i, e);
+	};
 
-  return (
-    <div className={classNames(['rce-container-mlist', props.className])} {...props.customProps}>
-      {!!props.children && props.isShowChild && props.children}
-      <div ref={referance} onScroll={onScroll} className='rce-mlist'>
-        {props.dataSource.map((x, i: number) => (
-          <MessageBox
-            key={i as Key}
-            {...(x as any)}
-            // data={x}
-            onOpen={props.onOpen && ((e: React.MouseEvent<HTMLElement>) => onOpen(x, i, e))}
-            onPhotoError={props.onPhotoError && ((e: React.MouseEvent<HTMLElement>) => onPhotoError(x, i, e))}
-            onDownload={props.onDownload && ((e: React.MouseEvent<HTMLElement>) => onDownload(x, i, e))}
-            onTitleClick={props.onTitleClick && ((e: React.MouseEvent<HTMLElement>) => onTitleClick(x, i, e))}
-            onForwardClick={props.onForwardClick && ((e: React.MouseEvent<HTMLElement>) => onForwardClick(x, i, e))}
-            onReplyClick={props.onReplyClick && ((e: React.MouseEvent<HTMLElement>) => onReplyClick(x, i, e))}
-            onReplyMessageClick={
-              props.onReplyMessageClick && ((e: React.MouseEvent<HTMLElement>) => onReplyMessageClick(x, i, e))
-            }
-            onRemoveMessageClick={
-              props.onRemoveMessageClick && ((e: React.MouseEvent<HTMLElement>) => onRemoveMessageClick(x, i, e))
-            }
-            onClick={props.onClick && ((e: React.MouseEvent<HTMLElement>) => onClick(x, i, e))}
-            onContextMenu={props.onContextMenu && ((e: React.MouseEvent<HTMLElement>) => onContextMenu(x, i, e))}
-            onMeetingMoreSelect={
-              props.onMeetingMoreSelect && ((e: React.MouseEvent<HTMLElement>) => onMeetingMoreSelect(x, i, e))
-            }
-            onMessageFocused={props.onMessageFocused && ((e: React.MouseEvent<HTMLElement>) => onMessageFocused(x, i, e))}
-            onMeetingMessageClick={
-              props.onMeetingMessageClick && ((e: React.MouseEvent<HTMLElement>) => onMeetingMessageClick(x, i, e))
-            }
-            onMeetingTitleClick={props.onMeetingTitleClick}
-            onMeetingVideoLinkClick={props.onMeetingVideoLinkClick}
-            onMeetingLinkClick={props.onMeetingLinkClick && ((e: React.MouseEvent<HTMLElement>) => onMeetingLinkClick(x, i, e))}
-            actionButtons={props.actionButtons}
-            styles={props.messageBoxStyles}
-            notchStyle={props.notchStyle}
-          />
-        ))}
-      </div>
-      {downButton === true && _downButton && toBottomHeight !== '100%' && (
-        <div className='rce-mlist-down-button' onClick={toBottom}>
-          <FaChevronDown />
-          {props.downButtonBadge !== undefined ? (
-            <span className='rce-mlist-down-button--badge'>{props.downButtonBadge.toString()}</span>
-          ) : null}
-        </div>
-      )}
-    </div>
-  )
-}
+	return (
+		<div
+			className={classNames(["rce-container-mlist", props.className])}
+			{...props.customProps}
+		>
+			{!!props.children && props.isShowChild && props.children}
+			<div
+				ref={reference as LegacyRef<HTMLDivElement>}
+				onScroll={onScroll}
+				className="rce-mlist"
+			>
+				{props.dataSource?.map((x, i) => {
+					return (
+						<MessageBox
+							{...x}
+							key={`rce-mlist${i.toString()}`}
+							onOpen={props.onOpen && ((e) => onOpen(x, i, e))}
+							onPhotoError={
+								props.onPhotoError &&
+								((e: React.MouseEvent) => onPhotoError(x, i, e))
+							}
+							onDownload={props.onDownload && ((e) => onDownload(x, i, e))}
+							onTitleClick={
+								props.onTitleClick && ((e) => onTitleClick(x, i, e))
+							}
+							onForwardClick={
+								props.onForwardClick && ((e) => onForwardClick(x, i, e))
+							}
+							onReplyClick={
+								props.onReplyClick && ((e) => onReplyClick(x, i, e))
+							}
+							onReplyMessageClick={
+								props.onReplyMessageClick &&
+								((e: React.MouseEvent) => onReplyMessageClick(x, i, e))
+							}
+							onRemoveMessageClick={
+								props.onRemoveMessageClick &&
+								((e: React.MouseEvent) => onRemoveMessageClick(x, i, e))
+							}
+							onClick={
+								props.onClicked && ((e: React.MouseEvent) => onClicked(x, i, e))
+							}
+							onContextMenuOpen={
+								props.onContextMenuOpen &&
+								((e: React.MouseEvent) => onContextMenuOpen(x, i, e))
+							}
+							onMeetingMoreSelect={
+								props.onMeetingMoreSelect &&
+								((e: React.MouseEvent) => onMeetingMoreSelect(x, i, e))
+							}
+							onMessageFocused={
+								props.onMessageFocused &&
+								((r: boolean) => onMessageFocused(x, i, r))
+							}
+							onMeetingMessageClick={
+								props.onMeetingMessageClick &&
+								((e: React.MouseEvent) => onMeetingMessageClick(x, i, e))
+							}
+							onMeetingTitleClick={props.onMeetingTitleClick}
+							onMeetingVideoLinkClick={props.onMeetingVideoLinkClick}
+							onMeetingLinkClick={
+								props.onMeetingLinkClick &&
+								((e: React.MouseEvent) => onMeetingLinkClick(x, i, e))
+							}
+							actionButtons={props.actionButtons}
+							styles={props.messageBoxStyles}
+							notchStyle={props.notchStyle}
+						/>
+					);
+				})}
+			</div>
+			{downButton === true && _downButton && toBottomHeight !== "100%" && (
+				<div
+					className="rce-mlist-down-button"
+					onClick={(event) => toBottom}
+					onKeyDown={(event) => toBottom}
+				>
+					<FaChevronDown />
+					{props.downButtonBadge !== undefined ? (
+						<span className="rce-mlist-down-button--badge">
+							{props.downButtonBadge.toString()}
+						</span>
+					) : null}
+				</div>
+			)}
+		</div>
+	);
+};
 
-export default MessageList
+export default MessageList;

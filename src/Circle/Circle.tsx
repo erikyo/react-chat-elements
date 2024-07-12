@@ -1,25 +1,29 @@
-import { useEffect, useMemo, useCallback } from 'react'
-import { Circle } from 'progressbar.js'
-import { ICircleProps } from '../type'
+import { type ReactElement, useEffect, useMemo, useRef } from "react";
+import { Circle } from "progressbar.js";
+import type { ICircleProps } from "../type";
 
-let wrapper: HTMLDivElement
-const ProgressCircle: React.FC<ICircleProps> = ({ animate, progressOptions, className }) => {
-  const bar = useMemo(() => {
-    wrapper = document.createElement('div')
-    return new Circle(wrapper, progressOptions)
-  }, [])
+let wrapper: HTMLDivElement;
+const ProgressCircle = ({
+	animate,
+	progressOptions,
+	className,
+}: ICircleProps): ReactElement => {
+	const ref = useRef(null);
+	const bar = useMemo(() => {
+		wrapper = document.createElement("div");
+		return new Circle(wrapper, progressOptions);
+	}, [progressOptions]);
 
-  const node = useCallback((node: any) => {
-    if (node) {
-      node.appendChild(wrapper)
-    }
-  }, [])
+	useEffect(() => {
+		if (ref.current === null) return;
+		(ref.current as HTMLDivElement).appendChild(wrapper);
+	}, []);
 
-  useEffect(() => {
-    bar.animate(animate)
-  }, [animate, bar])
+	useEffect(() => {
+		bar.animate(animate);
+	}, [animate, bar]);
 
-  return <div className={className} ref={node} />
-}
+	return <div className={className} ref={ref} />;
+};
 
-export default ProgressCircle
+export default ProgressCircle;
